@@ -1,0 +1,14 @@
+/* Copyright (c) 2004, Nokia. All rights reserved */
+
+
+//  LOCALISATION STRINGS
+// ASCII placeholders only: on-screen Russian strings are supplied
+// from code (tgstrings.h), rcomp 8.0 cannot compile UTF-8 sources.
+
+//d:Caption string for app.
+#define qtn_tgp_caption_string "TG Pager"
+
+//d:Short caption string for app.
+#define qtn_tgp_short_caption_string "TG Pager"
+
+// End of File

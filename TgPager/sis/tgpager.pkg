@@ -1,0 +1,11 @@
+; TgPager.pkg
+&EN
+
+#{"TG Pager"},(0x70000072),1,0,0
+
+(0x101F7960), 0, 0, 0, {"Series60ProductID"}
+
+"C:\Symbian\8.1a\S60_2nd_FP3\Epoc32\Release\THUMB\UREL\TgPager.APP"            -"!:\system\apps\TgPager\TgPager.app"
+"C:\Symbian\8.1a\S60_2nd_FP3\Epoc32\Data\Z\System\Apps\tgpager\TgPager.RSC"    -"!:\system\apps\TgPager\TgPager.rsc"
+"C:\Symbian\8.1a\S60_2nd_FP3\Epoc32\Data\Z\System\Apps\tgpager\TgPager_CAPTION.RSC" -"!:\system\apps\TgPager\TgPager_caption.rsc"
+"C:\Symbian\8.1a\S60_2nd_FP3\Epoc32\Data\Z\System\Apps\tgpager\TgPager.AIF"    -"!:\system\apps\TgPager\TgPager.aif"

@@ -1,0 +1,17 @@
+#ifndef __TGPAGER_HRH__
+#define __TGPAGER_HRH__
+
+enum TTgPagerIds
+    {
+    ETgPagerCmdWrite = 1,
+    ETgPagerCmdConnect,
+    ETgPagerCmdDisconnect,
+    ETgPagerCmdSettings,
+    ETgPagerCmdClear,
+    ETgPagerQueryMsg,
+    ETgPagerQueryHost,
+    ETgPagerQueryPort,
+    ETgPagerQueryCode
+    };
+
+#endif // __TGPAGER_HRH__

@@ -1,0 +1,11 @@
+; HelloN70.pkg
+&EN
+
+#{"Hello N70"},(0x70000070),1,0,0
+
+(0x101F7960), 0, 0, 0, {"Series60ProductID"}
+
+"C:\Symbian\8.1a\S60_2nd_FP3\Epoc32\Release\THUMB\UREL\HelloN70.APP"            -"!:\system\apps\HelloN70\HelloN70.app"
+"C:\Symbian\8.1a\S60_2nd_FP3\Epoc32\Data\Z\System\Apps\hellon70\HelloN70.RSC"    -"!:\system\apps\HelloN70\HelloN70.rsc"
+"C:\Symbian\8.1a\S60_2nd_FP3\Epoc32\Data\Z\System\Apps\hellon70\HelloN70_CAPTION.RSC" -"!:\system\apps\HelloN70\HelloN70_caption.rsc"
+"C:\Symbian\8.1a\S60_2nd_FP3\Epoc32\Data\Z\System\Apps\hellon70\HelloN70.AIF"    -"!:\system\apps\HelloN70\HelloN70.aif"
