@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>N70 live audio</title>
+<style>
+  :root { color-scheme: dark; font-family: system-ui, sans-serif; }
+  body { max-width: 38rem; margin: 10vh auto; padding: 1.5rem; background: #111a22; color: #edf5ff; }
+  h1 { font-size: 2rem; }
+  label { display: block; margin: 1.5rem 0 .5rem; }
+  input { box-sizing: border-box; width: 100%; padding: .8rem; font: inherit; }
+  button { padding: .8rem 1.1rem; margin: 1rem .5rem 0 0; font: inherit; cursor: pointer; }
+  #status { min-height: 3rem; color: #a8d8d0; }
+  small { color: #b8c5d2; }
+</style>
+<h1>N70 live audio</h1>
+<p>Listen to the phone's microphone through the Codec 2 proxy.</p>
+<label for="token">Listening token</label>
+<input id="token" type="password" autocomplete="off" spellcheck="false">
+<button id="start">Listen</button><button id="stop" disabled>Stop</button>
+<p id="status" role="status" aria-live="polite">Ready.</p>
+<small>Keep this tab active. Reconnect with Listen if the connection closes.</small>
+<script>
+"use strict";
+const startButton = document.getElementById("start");
+const stopButton = document.getElementById("stop");
+const status = document.getElementById("status");
+let context = null, socket = null, nextTime = 0, nextSample = null;
+let sources = new Set();
+let generation = 0;
+
+function clearAudio() {
+  for (const source of sources) { try { source.stop(); } catch (_) {} }
+  sources.clear();
+  nextTime = 0;
+  nextSample = null;
+}
+
+function stop() {
+  generation++;
+  if (socket) { socket.close(); socket = null; }
+  clearAudio();
+  if (context) { void context.close(); context = null; }
+  startButton.disabled = false;
+  stopButton.disabled = true;
+}
+
+function play(data) {
+  if (!context || context.state !== "running") return;
+  const view = new DataView(data);
+  if (view.byteLength < 12) throw new Error("Short PCM message");
+  const sample = view.getUint32(4, false);
+  const count = view.getUint16(8, false);
+  const flags = view.getUint16(10, false);
+  if (!count || count > 1600 || view.byteLength !== 12 + count * 2) {
+    throw new Error("Invalid PCM message");
+  }
+  if (flags || (nextSample !== null && sample !== nextSample)) clearAudio();
+  const now = context.currentTime;
+  // Rebuffer after underruns; discard scheduled backlog after long bursts.
+  if (nextTime < now + 0.03 || nextTime - now > 0.8) {
+    clearAudio();
+    nextTime = now + 0.2;
+  }
+  // The buffer carries its own source rate; Web Audio resamples to the device.
+  const buffer = context.createBuffer(1, count, 8000);
+  const output = buffer.getChannelData(0);
+  for (let i = 0; i < count; i++) output[i] = view.getInt16(12 + i * 2, true) / 32768;
+  const source = context.createBufferSource();
+  source.buffer = buffer;
+  source.connect(context.destination);
+  sources.add(source);
+  source.onended = () => { sources.delete(source); source.disconnect(); };
+  source.start(nextTime);
+  nextTime += count / 8000;
+  nextSample = (sample + count) >>> 0;
+}
+
+startButton.onclick = async () => {
+  stop();
+  const current = generation;
+  const token = document.getElementById("token").value.trim();
+  if (!/^[A-Za-z0-9_-]{32,128}$/.test(token)) {
+    status.textContent = "Enter a valid listening token (32–128 characters).";
+    return;
+  }
+  startButton.disabled = true;
+  stopButton.disabled = false;
+  try {
+    context = new AudioContext();
+    await context.resume(); // Called from the user's click, before network work.
+    if (current !== generation) return;
+    const ws = new WebSocket(`${location.protocol === "https:" ? "wss:" : "ws:"}//${location.host}/listen`);
+    socket = ws;
+    ws.binaryType = "arraybuffer";
+    status.textContent = "Connecting…";
+    ws.onopen = () => { if (current === generation) ws.send(JSON.stringify({token})); };
+    ws.onmessage = event => {
+      if (current !== generation) return;
+      try {
+        if (typeof event.data !== "string") { play(event.data); return; }
+        const message = JSON.parse(event.data);
+        if (message.event === "status") {
+          status.textContent = message.online ? "Phone connected. Listening…" : "Waiting for the phone…";
+        } else if (message.event === "stream_start" || message.event === "discontinuity") {
+          clearAudio();
+        }
+      } catch (error) { stop(); status.textContent = error.message; }
+    };
+    ws.onerror = () => { if (current === generation) status.textContent = "WebSocket connection failed."; };
+    ws.onclose = event => {
+      if (current !== generation) return;
+      stop();
+      status.textContent = event.code === 1008 ? "Listening token rejected." : "Disconnected. Click Listen to reconnect.";
+    };
+  } catch (error) {
+    if (current === generation) { stop(); status.textContent = error.message; }
+  }
+};
+stopButton.onclick = () => { stop(); status.textContent = "Stopped."; };
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden && socket) { stop(); status.textContent = "Paused while the tab is hidden. Click Listen to resume."; }
+});
+</script>
+</html>

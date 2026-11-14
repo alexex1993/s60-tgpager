@@ -1,5 +1,11 @@
 # TG Pager — Telegram-пейджер для Nokia N70 (S60 2nd FP3)
 
+Руководство на английском и прототип отдельного аудиопрокси:
+[Nokia N70 microphone streaming with Codec 2](codec2/README.md)
+(телефон → сервер → прослушивание в браузере).
+Быстрый запуск Python-сервера на macOS/Linux: [codec2/QUICKSTART.md](codec2/QUICKSTART.md).
+Промпт для будущего клиента под Windows/Symbian SDK: [codec2/WINDOWS_CLIENT_PROMPT.md](codec2/WINDOWS_CLIENT_PROMPT.md).
+
 Клиент двусторонней связи с Telegram-ботом через собственный прокси
 (телефон не умеет TLS — всю работу с Telegram API выполняет прокси на сервере).
 
